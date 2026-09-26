@@ -1,17 +1,16 @@
-
 # FinTrust Digital Bank – Data Analytics Project
 
-## Part 1: Data Understanding and Profiling
+## Project Overview
 
-### Project Overview
-
-FinTrust Digital Bank is a fictional digital banking dataset containing customer and transaction information. The purpose of this project is to understand customer and transaction data and investigate patterns that may help explain unsuccessful transactions.
+FinTrust Digital Bank is a fictional digital banking dataset containing customer and transaction information. The purpose of this project is to investigate patterns associated with unsuccessful transactions and identify areas that may require further investigation.
 
 The project follows a structured analytics process:
 
-**Business Understanding → Data Understanding → Data Analysis → Insights → Recommendations**
+**Business Understanding → Data Understanding → Data Quality & Cleaning → Data Analysis → Insights → Recommendations**
 
 ---
+
+# Part 1: Data Understanding and Profiling
 
 ## 1. Business Understanding
 
@@ -19,13 +18,13 @@ The project follows a structured analytics process:
 
 **Why are there a high number of failed transactions at FinTrust Digital Bank?**
 
-This question will guide the analysis throughout the project.
+This question guides the analysis throughout the project.
 
 Other areas of business interest include:
 
 * How customers use FinTrust's transaction channels
 * Which transaction types are most common
-* How transaction activity varies across customer groups and locations
+* How transaction activity varies across customer groups
 * Whether there are transaction patterns that require further investigation
 
 ### Decisions Data Analysis Could Support
@@ -138,59 +137,200 @@ No duplicate transaction IDs were identified.
 
 The categorical columns were reviewed using unique values to understand the categories present and identify any obvious inconsistencies.
 
-The transaction amount was reviewed using summary statistics. The mean transaction amount was higher than the median, indicating that the distribution is right-skewed and that some higher-value transactions may require further investigation during the analysis stage.
+The transaction amount was reviewed using summary statistics. The mean transaction amount was higher than the median, indicating that the distribution is right-skewed and that some higher-value transactions may require further investigation.
 
 ---
 
-# 3. Initial Data Quality Checks
+# 3. Data Quality and Cleaning
 
-The following checks were performed during the data-understanding stage:
+The datasets were further reviewed and cleaned before the main analysis.
 
-* Dataset structure and data types using `info()`
-* Missing values using `isnull().sum()`
-* Duplicate records and duplicate IDs
-* Unique values in categorical variables
-* Numerical summary statistics using `describe()`
-* Date/time conversion and validation
+### Data Quality Checks
 
-No extensive cleaning or transformation was performed at this stage because the purpose was to first understand the datasets before beginning the main analysis.
+The following checks were performed:
+
+* Number of records and columns
+* Missing values
+* Duplicate records
+* Unique Customer_ID and Transaction_ID values
+* Data types
+* Category consistency
+* Customer–Transaction relationship
+* Potential statistical outliers
+* Date/time validity
+
+### Data Type Validation
+
+All columns were checked in Power Query to confirm that they had an appropriate data type for their intended use.
+
+The following data type corrections were identified:
+
+* `Age` – changed to Whole Number
+* `Tenure_Months` – changed to Whole Number
+* `Digital_Engagement_Score` – changed to Decimal Number
+* `Amount_NGN` – changed to an appropriate numerical format
+* `Transaction_DateTime` – changed/validated as Date/Time
+
+The remaining columns were reviewed and confirmed to have appropriate data types for their intended use.
+
+### Missing Values
+
+The 96 missing `Device_Type` values and 96 missing `Location` values were replaced with `Unknown` rather than removing the affected transaction records.
+
+### Duplicates and Relationships
+
+No duplicate customer or transaction records were identified.
+
+All transaction `Customer_ID` values matched an existing customer record, allowing the datasets to be reliably joined.
+
+### Outlier Review
+
+Potential outliers were assessed using the 1.5 × IQR method.
+
+Four potential outliers were identified in `Digital_Engagement_Score`, but all were within the valid range and were retained.
+
+No statistical outliers were identified for Age or Tenure_Months.
+
+1,474 potential outliers were identified for `Amount_NGN`. These values were reviewed and appeared to represent plausible transaction amounts, so they were retained.
 
 ---
 
-# 4. Analytical Questions
+# Part 2: Data Analysis
 
-The main analysis will investigate the failed transaction problem through the following questions:
+## 4. SQL Business Analysis
 
-1. How large is the failed transaction problem?
-2. Which age groups are more affected by failed transactions?
-3. Are male or female customers more affected by failed transactions, considering the size of each customer group?
-4. Which transaction types have the highest failed transaction rates?
-5. Which channels have the highest failed transaction rates?
-6. Which locations and devices have the highest failed transaction rates?
-7. At what time of day are failed transactions most common?
-8. Are risk-reviewed transactions more likely to be unsuccessful than transactions that are not flagged for review?
+SQL was used to investigate customer behaviour, transaction activity, transaction values, transaction types, channels, transaction status and risk-review patterns.
+
+The analysis included:
+
+### Customer Segment
+
+The **Everyday** segment had the largest customer population, with **711 customers**.
+
+### Tenure and Transaction Activity
+
+The 73–96 month tenure group recorded the highest transaction volume with **3,240 transactions**, while the 25–48 month group recorded **2,843 transactions**.
+
+The differences between the groups were relatively moderate and did not show a strong relationship between tenure and transaction activity.
+
+### Transaction Status
+
+Successful transactions accounted for the majority of transaction activity:
+
+* Successful: 10,856
+* Failed: 630
+* Reversed: 326
+* Pending: 188
+
+### Transaction Channel
+
+The **Mobile App** recorded the highest transaction volume, with **5,102 transactions**.
+
+### Transaction Value
+
+Successful transactions accounted for the largest total transaction value at approximately **₦510.81 million**.
+
+Failed transactions accounted for approximately **₦24.83 million**.
+
+### Transaction Type
+
+**Bill Payment** had the highest failure rate at **5.83%**.
+
+Transfer transactions had the highest transaction volume, with **3,549 transactions**.
+
+This showed that the transaction type with the highest volume did not necessarily have the highest failure rate.
+
+### Transaction Channel Failure Rate
+
+The highest failure rate was recorded for the **Mobile App at 5.80%**, while ATM had the lowest at **4.18%**.
+
+### Risk Review
+
+Risk-reviewed transactions had a failure rate of **7.23%**, compared with **4.77%** for transactions that were not risk-reviewed.
+
+This represents a **2.46 percentage-point difference**.
+
+The result shows an association between risk-review status and transaction failure, but does not establish that risk review itself causes transaction failures.
+
+### Device Type and Risk Review
+
+The relationship between device type and transaction failure varied depending on risk-review status.
+
+For example, risk-reviewed iOS transactions had a **9.26% failure rate**, compared with **4.96%** for non-risk-reviewed iOS transactions.
+
+Web Browser was an exception, with a lower failure rate among risk-reviewed transactions.
+
+The Unknown device category had a small number of risk-reviewed transactions and was therefore interpreted cautiously.
 
 ---
 
-# 5. Planned Analysis
+# 5. Power BI Analysis
 
-The analysis will begin by measuring the size of the failed transaction problem and then breaking it down by relevant customer and transaction characteristics.
+Power BI was used to present the main findings from the analysis through an interactive dashboard.
 
-Where interesting patterns are identified, further drill-down analysis will be performed to investigate whether other variables are associated with those patterns.
+The dashboard includes:
 
-The analysis will distinguish between **observed associations and confirmed causes**, since the available data may show relationships without proving why a transaction failed.
+* Customer profile
+* Transaction profile
+* Transaction status
+* Failure rate by risk review
+* Failure rate by device type
+* Failure rate by time of day
+* Failure rate by international transaction
+* Device type and risk-review comparison
+
+The dashboard was designed to move from the overall transaction picture into the patterns associated with failed transactions.
 
 ---
 
-## Tools
+# 6. Key Findings
+
+The analysis identified several patterns requiring further investigation:
+
+1. Risk-reviewed transactions had a higher observed failure rate than non-risk-reviewed transactions.
+2. iOS transactions showed a higher failure rate, particularly among risk-reviewed transactions.
+3. Failure rates varied across transaction channels, with Mobile App recording the highest observed channel failure rate.
+4. Failure rates varied by time of day, with afternoon and evening showing higher observed failure rates than morning and night.
+5. Transaction type volume and failure rate did not always follow the same pattern.
+6. High transaction values identified as statistical outliers were retained because they appeared plausible rather than clearly representing data-entry errors.
+
+These findings represent observed patterns in the dataset and do not by themselves establish causation.
+
+---
+
+# 7. Recommendations
+
+Based on the observed patterns, the following areas could be investigated further:
+
+### 1. Review Risk-Review Processes
+
+Investigate why risk-reviewed transactions have a higher observed failure rate and whether particular risk rules, authentication requirements or transaction characteristics are associated with the difference.
+
+### 2. Investigate iOS Transactions
+
+Review iOS transactions, particularly those that are risk-reviewed, to determine whether authentication, risk rules or transaction-processing issues may be contributing to the higher observed failure rate.
+
+### 3. Monitor Peak Transaction Periods
+
+Monitor transaction volumes, system performance and error trends during afternoon and evening periods where higher failure rates were observed.
+
+---
+
+# 8. Tools
 
 * Python
 * Pandas
-* SQL
+* SQL Server / SSMS
 * Power BI
 * Excel
+* Power Query
 
-## Project Status
+---
+
+# 9. Project Status
 
 **Part 1 – Data Understanding:** Completed
-**Part 2 – Data Analysis:** In progress
+**Data Quality & Cleaning:** Completed
+**SQL Business Analysis:** Completed
+**Power BI Analysis:** Completed
+**Insights & Recommendations:** Completed
